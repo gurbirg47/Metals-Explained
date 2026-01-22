@@ -9,6 +9,7 @@ import {
   getTimeseries,
   getExplanation,
   refreshData,
+  API_BASE,
   SnapshotResponse,
   TimeseriesResponse,
   ExplainResponse,
@@ -75,7 +76,7 @@ const MemoizedChart = memo(function MemoizedChart({
     <PriceChart
       title={title}
       series={series.series}
-      hasOHLC={series.hasOHLC}
+      hasOHLC={series.supportsCandles}
       chartType={chartType}
       color={color}
     />
@@ -97,6 +98,14 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(!isCacheValid());
   const [error, setError] = useState<string | null>(null);
 
+  // Diagnostic connectivity check
+  useEffect(() => {
+    console.log(`[Diagnostic] Attempting to reach backend at: ${API_BASE}`);
+    fetch(`${API_BASE}/health`)
+      .then(r => console.log(`[Diagnostic] Health check: ${r.status} ${r.ok ? 'OK' : 'Error'}`))
+      .catch(e => console.error(`[Diagnostic] Backend unreachable:`, e.message));
+  }, []);
+
   const loadData = useCallback(async (forceRefresh = false) => {
     if (!forceRefresh && isCacheValid()) {
       setSnapshot(dataCache.snapshot);
@@ -115,7 +124,7 @@ export default function HomePage() {
     setError(null);
 
     try {
-      // Fetch all data in parallel - including both gold and silver volatility
+      // Fetch all data in parallel
       const results = await Promise.allSettled([
         getSnapshot(),
         getTimeseries('gold', '1M'),
@@ -135,7 +144,9 @@ export default function HomePage() {
       const silverVol = results[6].status === 'fulfilled' ? results[6].value : null;
 
       if (!snap) {
-        setError('Unable to load market data. Please ensure the backend is running.');
+        const errorDetail = results[0].status === 'rejected' ? (results[0].reason as Error).message : 'Snapshot returned empty data (null)';
+        const baseUrl = API_BASE || 'NONE';
+        setError(`Unable to load market data: ${errorDetail}. URL: ${baseUrl}.`);
         setIsLoading(false);
         return;
       }
@@ -203,7 +214,6 @@ export default function HomePage() {
     };
   };
 
-  // Loading state
   if (isLoading && !snapshot) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
@@ -215,7 +225,6 @@ export default function HomePage() {
     );
   }
 
-  // Error state
   if (error || !snapshot) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
@@ -232,7 +241,6 @@ export default function HomePage() {
   const silverChange = formatChange(snapshot.silver.pctChange);
   const dxyChange = formatChange(snapshot.dxy.pctChange);
 
-  // Get the selected asset's series and volatility
   const selectedSeries = selectedAsset === 'gold' ? goldSeries : silverSeries;
   const selectedVolSeries = selectedAsset === 'gold' ? goldVolSeries : silverVolSeries;
   const selectedColor = selectedAsset === 'gold' ? '#FFD700' : '#C0C0C0';
@@ -277,18 +285,10 @@ export default function HomePage() {
         />
         <MetricCard
           label={`${selectedAsset.toUpperCase()} VOL`}
-          value={snapshot.vol.value ? `${snapshot.vol.value.toFixed(1)}%` : 'N/A'}
-          delta="20D realized"
+          value={snapshot.vol[selectedAsset]?.value ? `${snapshot.vol[selectedAsset].value.toFixed(1)}%` : 'N/A'}
+          delta={snapshot.vol[selectedAsset]?.type || "realized"}
           deltaType="neutral"
         />
-      </div>
-
-      {/* Driver Ranking */}
-      <div className="driver-ranking text-xs">
-        <span>DRIVER RANKING: </span>
-        <span className="text-[var(--signal-accent)] font-semibold">Primary = {snapshot.drivers.primary}</span>
-        <span className="text-[var(--text-muted)]"> | Secondary = {snapshot.drivers.secondary}</span>
-        <span className="text-[var(--text-muted)]"> | Vol = {snapshot.drivers.volLevel}</span>
       </div>
 
       {/* Price Chart Section */}
@@ -296,7 +296,6 @@ export default function HomePage() {
 
       {/* Controls Row */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
-        {/* Asset Dropdown */}
         <div className="flex items-center gap-2">
           <label className="text-xs text-[var(--text-muted)] mono">Asset:</label>
           <select
@@ -309,7 +308,6 @@ export default function HomePage() {
           </select>
         </div>
 
-        {/* Chart Type Toggle */}
         <div className="flex gap-1">
           <button
             onClick={() => setChartType('line')}
@@ -358,9 +356,8 @@ export default function HomePage() {
       <div className="mt-5">
         <h2 className="text-lg border-b border-[var(--text-muted)] pb-2 mb-3">Market Analysis</h2>
 
-        {/* Disclaimer */}
         <p className="text-[var(--text-muted)] text-xs italic mb-3 px-2 py-1 bg-[rgba(255,255,255,0.02)] rounded">
-          Market analysis is provided for educational purposes only and does not constitute financial or investment advice.
+          {explanation?.disclaimer || "Market analysis is provided for educational purposes only and does not constitute financial or investment advice."}
         </p>
 
         {explanation ? (
@@ -371,26 +368,21 @@ export default function HomePage() {
             </div>
 
             <div className="section-card py-2">
-              <h4 className="section-title text-xs">Mechanism: Primary Driver</h4>
-              <p className="text-[var(--text-muted)] text-xs">{explanation.sections.drivers}</p>
+              <h4 className="section-title text-xs">Mechanism: Most Likely Driver</h4>
+              <p className="text-[var(--text-muted)] text-xs">{explanation.sections.mostLikelyDriver}</p>
             </div>
 
             <div className="section-card py-2">
-              <h4 className="section-title text-xs">Implication: Signal Alignment</h4>
-              <p className="text-[var(--text-muted)] text-xs">{explanation.sections.conflictCheck}</p>
-            </div>
-
-            <div className="section-card py-2">
-              <h4 className="section-title text-xs">Chart Observations</h4>
-              <ul className="text-[var(--text-muted)] text-xs list-disc list-inside">
-                {explanation.sections.chartBullets.map((bullet, i) => (
-                  <li key={i}>{bullet}</li>
+              <h4 className="section-title text-xs">Chart Evidence</h4>
+              <div className="space-y-1">
+                {explanation.sections.chartEvidence.map((bullet, i) => (
+                  <p key={i} className="text-[var(--text-muted)] text-xs">• {bullet}</p>
                 ))}
-              </ul>
+              </div>
             </div>
 
-            <div className="section-card py-2 bg-[rgba(255,255,255,0.02)]">
-              <h4 className="section-title text-xs">Summary</h4>
+            <div className="section-card py-2 bg-[rgba(255,255,255,0.02)] border-l-2 border-[var(--signal-accent)]">
+              <h4 className="section-title text-xs">Plain Takeaway</h4>
               <p className="text-[var(--text-primary)] text-xs">{explanation.sections.plainTakeaway}</p>
             </div>
           </div>
