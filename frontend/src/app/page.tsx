@@ -14,14 +14,15 @@ import {
   ExplainResponse,
 } from '@/lib/api';
 
-// Session cache
+// Session cache - includes both gold and silver volatility
 const dataCache: {
   snapshot: SnapshotResponse | null;
   gold: TimeseriesResponse | null;
   silver: TimeseriesResponse | null;
   yield: TimeseriesResponse | null;
   dxy: TimeseriesResponse | null;
-  vol: TimeseriesResponse | null;
+  goldVol: TimeseriesResponse | null;
+  silverVol: TimeseriesResponse | null;
   explanation: ExplainResponse | null;
   timestamp: number;
 } = {
@@ -30,7 +31,8 @@ const dataCache: {
   silver: null,
   yield: null,
   dxy: null,
-  vol: null,
+  goldVol: null,
+  silverVol: null,
   explanation: null,
   timestamp: 0,
 };
@@ -86,7 +88,8 @@ export default function HomePage() {
   const [silverSeries, setSilverSeries] = useState<TimeseriesResponse | null>(dataCache.silver);
   const [yieldSeries, setYieldSeries] = useState<TimeseriesResponse | null>(dataCache.yield);
   const [dxySeries, setDxySeries] = useState<TimeseriesResponse | null>(dataCache.dxy);
-  const [volSeries, setVolSeries] = useState<TimeseriesResponse | null>(dataCache.vol);
+  const [goldVolSeries, setGoldVolSeries] = useState<TimeseriesResponse | null>(dataCache.goldVol);
+  const [silverVolSeries, setSilverVolSeries] = useState<TimeseriesResponse | null>(dataCache.silverVol);
   const [explanation, setExplanation] = useState<ExplainResponse | null>(dataCache.explanation);
 
   const [selectedAsset, setSelectedAsset] = useState<'gold' | 'silver'>('gold');
@@ -101,7 +104,8 @@ export default function HomePage() {
       setSilverSeries(dataCache.silver);
       setYieldSeries(dataCache.yield);
       setDxySeries(dataCache.dxy);
-      setVolSeries(dataCache.vol);
+      setGoldVolSeries(dataCache.goldVol);
+      setSilverVolSeries(dataCache.silverVol);
       setExplanation(dataCache.explanation);
       setIsLoading(false);
       return;
@@ -111,14 +115,15 @@ export default function HomePage() {
     setError(null);
 
     try {
-      // Fetch all data in parallel
+      // Fetch all data in parallel - including both gold and silver volatility
       const results = await Promise.allSettled([
         getSnapshot(),
         getTimeseries('gold', '1M'),
         getTimeseries('silver', '1M'),
         getTimeseries('us10y', '1M'),
         getTimeseries('dxy', '1M'),
-        getTimeseries('vol', '1M'),
+        getTimeseries('gold_vol', '1M'),
+        getTimeseries('silver_vol', '1M'),
       ]);
 
       const snap = results[0].status === 'fulfilled' ? results[0].value : null;
@@ -126,7 +131,8 @@ export default function HomePage() {
       const silver = results[2].status === 'fulfilled' ? results[2].value : null;
       const yld = results[3].status === 'fulfilled' ? results[3].value : null;
       const dxy = results[4].status === 'fulfilled' ? results[4].value : null;
-      const vol = results[5].status === 'fulfilled' ? results[5].value : null;
+      const goldVol = results[5].status === 'fulfilled' ? results[5].value : null;
+      const silverVol = results[6].status === 'fulfilled' ? results[6].value : null;
 
       if (!snap) {
         setError('Unable to load market data. Please ensure the backend is running.');
@@ -139,7 +145,8 @@ export default function HomePage() {
       setSilverSeries(silver);
       setYieldSeries(yld);
       setDxySeries(dxy);
-      setVolSeries(vol);
+      setGoldVolSeries(goldVol);
+      setSilverVolSeries(silverVol);
       setIsLoading(false);
 
       // Update cache
@@ -148,7 +155,8 @@ export default function HomePage() {
       dataCache.silver = silver;
       dataCache.yield = yld;
       dataCache.dxy = dxy;
-      dataCache.vol = vol;
+      dataCache.goldVol = goldVol;
+      dataCache.silverVol = silverVol;
       dataCache.timestamp = Date.now();
 
       // Fetch explanation in background
@@ -224,10 +232,12 @@ export default function HomePage() {
   const silverChange = formatChange(snapshot.silver.pctChange);
   const dxyChange = formatChange(snapshot.dxy.pctChange);
 
-  // Get the selected asset's series
+  // Get the selected asset's series and volatility
   const selectedSeries = selectedAsset === 'gold' ? goldSeries : silverSeries;
+  const selectedVolSeries = selectedAsset === 'gold' ? goldVolSeries : silverVolSeries;
   const selectedColor = selectedAsset === 'gold' ? '#FFD700' : '#C0C0C0';
   const selectedLabel = selectedAsset === 'gold' ? 'Gold' : 'Silver';
+  const selectedVolLabel = selectedAsset === 'gold' ? 'Gold Volatility (20D)' : 'Silver Volatility (20D)';
 
   return (
     <div>
@@ -266,9 +276,9 @@ export default function HomePage() {
           deltaType={dxyChange.type}
         />
         <MetricCard
-          label="VOLATILITY"
+          label={`${selectedAsset.toUpperCase()} VOL`}
           value={snapshot.vol.value ? `${snapshot.vol.value.toFixed(1)}%` : 'N/A'}
-          delta={snapshot.vol.label}
+          delta="20D realized"
           deltaType="neutral"
         />
       </div>
@@ -337,8 +347,8 @@ export default function HomePage() {
           color="#33C5F4"
         />
         <MemoizedChart
-          title="Gold Volatility (20D)"
-          series={volSeries}
+          title={selectedVolLabel}
+          series={selectedVolSeries}
           chartType="line"
           color="#FF453A"
         />
