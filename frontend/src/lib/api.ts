@@ -1,11 +1,7 @@
 /**
  * API client for the Metals, Explained backend
+ * Uses Next.js API routes (relative paths) for seamless deployment.
  */
-
-export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ||
-    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-        ? 'http://localhost:8000'
-        : '/api');
 
 export interface VolMetric {
     value: number;
@@ -17,10 +13,10 @@ export interface SnapshotResponse {
     asOf: string;
     mode: 'live' | 'demo' | 'partial';
     feeds: Record<string, 'live' | 'demo'>;
-    gold: { price: number | null; pctChange: number | null };
-    silver: { price: number | null; pctChange: number | null };
-    us10y: { yield: number | null; bpsChange: number | null };
-    dxy: { value: number | null; pctChange: number | null };
+    gold: { price: number; pctChange: number };
+    silver: { price: number; pctChange: number };
+    us10y: { yield: number; bpsChange: number };
+    dxy: { value: number; pctChange: number };
     vol: {
         gold: VolMetric;
         silver: VolMetric;
@@ -40,7 +36,7 @@ export interface TimeseriesResponse {
     asOf: string;
     asset: string;
     window: string;
-    hasOHLC: boolean;
+    supportsCandles: boolean;
     series: TimeseriesPoint[];
 }
 
@@ -59,40 +55,43 @@ export interface ExplainResponse {
 }
 
 export async function getHealth(): Promise<{ status: string }> {
-    const res = await fetch(`${API_BASE}/health`);
+    const res = await fetch('/api/health');
     return res.json();
 }
 
 export async function getSnapshot(): Promise<SnapshotResponse> {
-    const res = await fetch(`${API_BASE}/market/snapshot`, { cache: 'no-store' });
+    const res = await fetch('/api/market/snapshot', { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch snapshot');
     return res.json();
 }
 
 export async function getTimeseries(
-    asset: 'gold' | 'silver' | 'us10y' | 'dxy' | 'vol' | 'gold_vol' | 'silver_vol',
-    window: '1D' | '5D' | '1M' | '3M' | '1Y' = '1M'
+    asset: 'gold' | 'silver' | 'us10y' | 'dxy' | 'vol_gold' | 'vol_silver',
+    window: '1D' | '5D' | '1M' | '3M' | '6M' | '1Y' = '1M'
 ): Promise<TimeseriesResponse> {
     const res = await fetch(
-        `${API_BASE}/market/timeseries?asset=${asset}&window=${window}`,
+        `/api/market/timeseries?asset=${asset}&window=${window}`,
         { cache: 'no-store' }
     );
     if (!res.ok) throw new Error('Failed to fetch timeseries');
     return res.json();
 }
 
-export async function getExplanation(asset: string = 'gold', window: string = '1D'): Promise<ExplainResponse> {
-    const res = await fetch(`${API_BASE}/market/explain`, {
+export async function getExplanation(
+    asset: string = 'gold',
+    snapshot: SnapshotResponse
+): Promise<ExplainResponse> {
+    const res = await fetch('/api/market/explain', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selectedAsset: asset, window }),
+        body: JSON.stringify({ selectedAsset: asset, snapshot }),
         cache: 'no-store',
     });
     if (!res.ok) throw new Error('Failed to fetch explanation');
     return res.json();
 }
 
-export async function refreshData(): Promise<{ status: string; asOf: string }> {
-    const res = await fetch(`${API_BASE}/market/refresh`, { method: 'POST' });
-    return res.json();
+export async function refreshData(): Promise<{ status: string }> {
+    // For Next.js API routes, refresh just means refetching
+    return { status: 'ready' };
 }

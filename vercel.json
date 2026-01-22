@@ -1,27 +1,6 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "api/index.py",
-            "use": "@vercel/python"
-        },
-        {
-            "src": "frontend/package.json",
-            "use": "@vercel/next"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/api/health",
-            "dest": "/api/index.py"
-        },
-        {
-            "src": "/api/market/(.*)",
-            "dest": "/api/index.py"
-        },
-        {
-            "src": "/((?!api).*)",
-            "dest": "/frontend/$1"
-        }
-    ]
+    "framework": "nextjs",
+    "buildCommand": "cd frontend && npm run build",
+    "outputDirectory": "frontend/.next",
+    "installCommand": "cd frontend && npm install"
 }

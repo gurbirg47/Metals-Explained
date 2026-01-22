@@ -9,7 +9,6 @@ import {
   getTimeseries,
   getExplanation,
   refreshData,
-  API_BASE,
   SnapshotResponse,
   TimeseriesResponse,
   ExplainResponse,
@@ -76,7 +75,7 @@ const MemoizedChart = memo(function MemoizedChart({
     <PriceChart
       title={title}
       series={series.series}
-      hasOHLC={series.hasOHLC}
+      hasOHLC={series.supportsCandles}
       chartType={chartType}
       color={color}
     />
@@ -100,10 +99,10 @@ export default function HomePage() {
 
   // Diagnostic connectivity check
   useEffect(() => {
-    console.log(`[Diagnostic] Attempting to reach backend at: ${API_BASE}`);
-    fetch(`${API_BASE}/health`)
+    console.log('[Diagnostic] Using Next.js API routes');
+    fetch('/api/health')
       .then(r => console.log(`[Diagnostic] Health check: ${r.status} ${r.ok ? 'OK' : 'Error'}`))
-      .catch(e => console.error(`[Diagnostic] Backend unreachable:`, e.message));
+      .catch(e => console.error('[Diagnostic] API unreachable:', e.message));
   }, []);
 
   const loadData = useCallback(async (forceRefresh = false) => {
@@ -131,8 +130,8 @@ export default function HomePage() {
         getTimeseries('silver', '1M'),
         getTimeseries('us10y', '1M'),
         getTimeseries('dxy', '1M'),
-        getTimeseries('gold_vol', '1M'),
-        getTimeseries('silver_vol', '1M'),
+        getTimeseries('vol_gold', '1M'),
+        getTimeseries('vol_silver', '1M'),
       ]);
 
       const snap = results[0].status === 'fulfilled' ? results[0].value : null;
@@ -144,9 +143,8 @@ export default function HomePage() {
       const silverVol = results[6].status === 'fulfilled' ? results[6].value : null;
 
       if (!snap) {
-        const errorDetail = results[0].status === 'rejected' ? (results[0].reason as Error).message : 'Snapshot returned empty data (null)';
-        const baseUrl = API_BASE || 'NONE';
-        setError(`Unable to load market data: ${errorDetail}. URL: ${baseUrl}.`);
+        const errorDetail = results[0].status === 'rejected' ? (results[0].reason as Error).message : 'Snapshot returned empty data';
+        setError(`Unable to load market data: ${errorDetail}`);
         setIsLoading(false);
         return;
       }
@@ -182,7 +180,7 @@ export default function HomePage() {
     if (!snapshot) return;
 
     setExplanation(null); // Clear old analysis
-    getExplanation(selectedAsset, '1D')
+    getExplanation(selectedAsset, snapshot)
       .then((explain) => {
         setExplanation(explain);
         dataCache.explanation = explain;
@@ -257,12 +255,13 @@ export default function HomePage() {
       {/* Dev-only Diagnostic Banner */}
       {(process.env.NODE_ENV === 'development' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'))) && (
         <div className="bg-[rgba(51,197,244,0.1)] border-b border-[rgba(51,197,244,0.2)] px-4 py-1 text-[10px] mono text-[var(--signal-accent)] flex justify-between items-center">
-          <span>[DIAGNOSTIC] API_BASE: {API_BASE}</span>
+          <span>[Next.js API Routes]</span>
           <span className={snapshot ? 'text-green-400' : 'text-red-400'}>
-            BACKEND: {snapshot ? 'CONNECTED' : 'DISCONNECTED'}
+            STATUS: {snapshot ? 'CONNECTED' : 'DISCONNECTED'}
           </span>
         </div>
       )}
+
 
       <DataBanner snapshot={snapshot} onRefresh={handleRefresh} isLoading={isLoading} />
 
