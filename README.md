@@ -2,13 +2,15 @@
 
 A learning-focused dashboard for understanding how gold and silver markets respond to macroeconomic forces.
 
+**Live Demo:** [metals-explained.vercel.app](https://metals-explained.vercel.app)
+
 ---
 
 ## Overview
 
 Metals, Explained is an educational tool designed to help students understand the behavior of precious metals markets. It provides real-time and historical context for gold and silver prices, along with the key macroeconomic indicators that influence them.
 
-The project is intended for students learning about financial markets, macroeconomics, and the Sales & Trading function.
+The project is intended for students learning about financial markets and macroeconomics.
 
 **This is not a trading system, forecasting tool, or investment platform. It is strictly an educational reference.**
 
@@ -16,25 +18,23 @@ The project is intended for students learning about financial markets, macroecon
 
 ## Architecture
 
-This project uses a split architecture:
-
-- **Backend**: FastAPI (Python) serving market data and explanations
-- **Frontend**: Next.js (React) providing the user interface
-- **Charts**: TradingView Lightweight Charts for line and candlestick visualizations
+This is a **Next.js** application with integrated API routes:
 
 ```
 Dashboard/
-├── backend/               # FastAPI Python API
-│   ├── main.py           # API endpoints
-│   ├── market_data.py    # Data fetching logic
-│   ├── analysis_engine.py# Explanation generation
-│   └── requirements.txt
-│
-├── frontend/             # Next.js React app
-│   ├── src/app/         # Pages (8 tabs)
-│   ├── src/components/  # Reusable UI components
-│   └── src/lib/         # API client
-│
+├── src/
+│   ├── app/                  # Pages and API routes
+│   │   ├── api/              # Next.js API endpoints
+│   │   │   ├── health/       # Health check
+│   │   │   └── market/       # Market data endpoints
+│   │   ├── page.tsx          # Today (main dashboard)
+│   │   ├── drivers/          # Drivers tab
+│   │   ├── history/          # History tab
+│   │   └── ...               # Other educational tabs
+│   ├── components/           # Reusable UI components
+│   └── lib/                  # API client and utilities
+├── public/                   # Static assets
+├── package.json
 └── README.md
 ```
 
@@ -44,43 +44,30 @@ Dashboard/
 
 ### Prerequisites
 
-- Python 3.12+
 - Node.js 18+
-- npm or yarn
+- npm
 
 ### Running Locally
 
-**1. Start the Backend**
-
 ```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
-
-The API will be available at http://localhost:8000
-
-**2. Start the Frontend**
-
-```bash
-cd frontend
 npm install
 npm run dev
 ```
 
-The frontend will be available at http://localhost:3000
+The application will be available at http://localhost:3000
 
 ---
 
 ## API Endpoints
 
+All endpoints are Next.js API routes (no separate backend required):
+
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/health` | GET | Health check |
-| `/market/snapshot` | GET | Current prices, yields, and driver analysis |
-| `/market/timeseries` | GET | OHLC price history for charting |
-| `/market/explain` | POST | Structured market explanation |
-| `/market/refresh` | POST | Clear cache and refresh data |
+| `/api/health` | GET | Health check |
+| `/api/market/snapshot` | GET | Current prices, yields, and volatility |
+| `/api/market/timeseries` | GET | OHLC price history for charting |
+| `/api/market/explain` | POST | Structured market explanation |
 
 ---
 
@@ -107,17 +94,11 @@ The frontend will be available at http://localhost:3000
 
 ## Deployment
 
-### Backend → Render / Railway / Fly.io
+### Vercel (Recommended)
 
-1. Push the `backend/` folder to a repository
-2. Set start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-3. Set Python version to 3.12
-
-### Frontend → Vercel
-
-1. Connect your GitHub repository
-2. Set root directory to `frontend/`
-3. Add environment variable: `NEXT_PUBLIC_API_BASE_URL=https://your-backend-url.com`
+1. Connect your GitHub repository to Vercel
+2. Vercel will auto-detect Next.js and deploy
+3. No environment variables required
 
 ---
 
@@ -131,4 +112,4 @@ This application is for educational purposes only. It does not provide investmen
 
 Created by **Gurbir Gill**
 
-Accounting & Finance student with an interest in Sales & Trading and market structure.
+Accounting & Finance student with an interest in financial markets.
