@@ -71,7 +71,7 @@ export async function getSnapshot(): Promise<SnapshotResponse> {
 }
 
 export async function getTimeseries(
-    asset: 'gold' | 'silver' | 'us10y' | 'dxy' | 'vol',
+    asset: 'gold' | 'silver' | 'us10y' | 'dxy' | 'vol' | 'gold_vol' | 'silver_vol',
     window: '1D' | '5D' | '1M' | '3M' | '1Y' = '1M'
 ): Promise<TimeseriesResponse> {
     const res = await fetch(
