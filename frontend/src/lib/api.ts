@@ -2,61 +2,60 @@
  * API client for the Metals, Explained backend
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ||
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:8000'
+        : '/api');
 
-export interface FeedStatus {
-    isLive: boolean;
+export interface VolMetric {
+    value: number;
+    change: number;
+    type: string;
 }
 
 export interface SnapshotResponse {
     asOf: string;
     mode: 'live' | 'demo' | 'partial';
-    feeds: {
-        gold: FeedStatus;
-        silver: FeedStatus;
-        us10y: FeedStatus;
-        dxy: FeedStatus;
-    };
+    feeds: Record<string, 'live' | 'demo'>;
     gold: { price: number | null; pctChange: number | null };
     silver: { price: number | null; pctChange: number | null };
     us10y: { yield: number | null; bpsChange: number | null };
     dxy: { value: number | null; pctChange: number | null };
-    vol: { value: number | null; label: string };
-    drivers: {
-        primary: string;
-        secondary: string;
-        volLevel: string;
+    vol: {
+        gold: VolMetric;
+        silver: VolMetric;
     };
 }
 
 export interface TimeseriesPoint {
     t: string;
-    c: number | null;
-    o?: number | null;
-    h?: number | null;
-    l?: number | null;
+    value?: number | null;
+    open?: number | null;
+    high?: number | null;
+    low?: number | null;
+    close?: number | null;
 }
 
 export interface TimeseriesResponse {
     asOf: string;
     asset: string;
     window: string;
-    hasOHLC: boolean;
-    isMock: boolean;
+    supportsCandles: boolean;
     series: TimeseriesPoint[];
 }
 
 export interface ExplainSections {
     whatMoved: string;
-    drivers: string;
-    conflictCheck: string;
-    chartBullets: string[];
+    mostLikelyDriver: string;
+    chartEvidence: string[];
     plainTakeaway: string;
 }
 
 export interface ExplainResponse {
     asOf: string;
+    selectedAsset: string;
     sections: ExplainSections;
+    disclaimer: string;
 }
 
 export async function getHealth(): Promise<{ status: string }> {

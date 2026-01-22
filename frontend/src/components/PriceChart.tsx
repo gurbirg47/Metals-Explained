@@ -45,6 +45,7 @@ export default function PriceChart({
                 vertLines: { color: 'rgba(160, 168, 176, 0.1)' },
                 horzLines: { color: 'rgba(160, 168, 176, 0.15)' },
             },
+            维持Width: true,
             width: chartContainerRef.current.clientWidth,
             height: 280,
             timeScale: {
@@ -72,13 +73,13 @@ export default function PriceChart({
             });
 
             const candleData = series
-                .filter((p) => p.o != null && p.h != null && p.l != null && p.c != null)
+                .filter((p) => p.open != null && p.high != null && p.low != null && p.close != null)
                 .map((p) => ({
                     time: p.t.split('T')[0] as `${number}-${number}-${number}`,
-                    open: p.o!,
-                    high: p.h!,
-                    low: p.l!,
-                    close: p.c!,
+                    open: p.open!,
+                    high: p.high!,
+                    low: p.low!,
+                    close: p.close!,
                 }));
 
             candlestickSeries.setData(candleData);
@@ -89,10 +90,10 @@ export default function PriceChart({
             });
 
             const lineData = series
-                .filter((p) => p.c != null)
+                .filter((p) => p.value != null || p.close != null)
                 .map((p) => ({
                     time: p.t.split('T')[0] as `${number}-${number}-${number}`,
-                    value: p.c!,
+                    value: (p.value ?? p.close)!,
                 }));
 
             lineSeries.setData(lineData);
