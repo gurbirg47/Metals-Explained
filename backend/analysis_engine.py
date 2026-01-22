@@ -11,30 +11,28 @@ import numpy as np
 # DRIVER DETECTION
 # ─────────────────────────────────────────────────────────────────────────────
 
-def determine_drivers(market_data: Dict) -> Dict:
+def determine_drivers(market_data: Dict, asset_key: str = "gold") -> Dict:
     """
     Analyze market conditions to rank the primary and secondary drivers
     of precious metals price action.
     """
     us10y = market_data.get("us10y", {}).get("metrics", {})
     dxy = market_data.get("dxy", {}).get("metrics", {})
-    gold = market_data.get("gold", {}).get("metrics", {})
-    silver = market_data.get("silver", {}).get("metrics", {})
+    asset = market_data.get(asset_key, {}).get("metrics", {})
     
     yield_chg = us10y.get("change_pct") or 0
     dxy_chg = dxy.get("change_pct") or 0
-    gold_chg = gold.get("change_pct") or 0
-    silver_chg = silver.get("change_pct") or 0
+    asset_chg = asset.get("change_pct") or 0
     
     yield_score = abs(yield_chg) * 15
     dxy_score = abs(dxy_chg) * 10
     
     yield_bearish = yield_chg > 0
     dxy_bearish = dxy_chg > 0
-    gold_down = gold_chg < 0
+    asset_down = asset_chg < 0
     
-    yield_aligned = (yield_bearish == gold_down) if abs(yield_chg) > 0.1 else None
-    dxy_aligned = (dxy_bearish == gold_down) if abs(dxy_chg) > 0.1 else None
+    yield_aligned = (yield_bearish == asset_down) if abs(yield_chg) > 0.1 else None
+    dxy_aligned = (dxy_bearish == asset_down) if abs(dxy_chg) > 0.1 else None
     
     if yield_score > dxy_score:
         primary = "Interest Rates"
@@ -43,10 +41,10 @@ def determine_drivers(market_data: Dict) -> Dict:
         primary = "U.S. Dollar"
         secondary = "Interest Rates"
     
-    metals_move = max(abs(gold_chg), abs(silver_chg))
-    if metals_move > 1.5:
+    asset_move = abs(asset_chg)
+    if asset_move > 1.5:
         vol_level = "Elevated"
-    elif metals_move > 0.7:
+    elif asset_move > 0.7:
         vol_level = "Moderate"
     else:
         vol_level = "Subdued"
@@ -80,7 +78,7 @@ def determine_drivers(market_data: Dict) -> Dict:
 # TODAY TAB: MARKET CONTEXT SECTIONS
 # ─────────────────────────────────────────────────────────────────────────────
 
-def get_what_moved(market_data: Dict) -> str:
+def get_what_moved(market_data: Dict, asset_key: str = "gold") -> str:
     """Observation: Describe price movements in precise terms."""
     gold = market_data.get("gold", {}).get("metrics", {})
     silver = market_data.get("silver", {}).get("metrics", {})
@@ -121,9 +119,9 @@ def get_what_moved(market_data: Dict) -> str:
     return f"{g} {s}{compare}"
 
 
-def get_clean_story(market_data: Dict) -> str:
+def get_clean_story(market_data: Dict, asset_key: str = "gold") -> str:
     """Mechanism: Explain the macroeconomic relationship driving price action."""
-    drivers = determine_drivers(market_data)
+    drivers = determine_drivers(market_data, asset_key)
     us10y = market_data.get("us10y", {}).get("metrics", {})
     dxy = market_data.get("dxy", {}).get("metrics", {})
     
@@ -138,14 +136,14 @@ def get_clean_story(market_data: Dict) -> str:
         if yield_chg > 0.1:
             return (
                 f"The 10-year Treasury yield has risen to {yield_val:.2f}%. "
-                f"Higher nominal yields increase the opportunity cost of holding non-yielding assets such as gold, "
+                f"Higher nominal yields increase the opportunity cost of holding non-yielding assets such as {asset_key}, "
                 f"as investors can obtain greater returns from interest-bearing instruments. "
                 f"This relationship historically tends to create downward pressure on precious metals prices."
             )
         elif yield_chg < -0.1:
             return (
                 f"The 10-year Treasury yield has declined to {yield_val:.2f}%. "
-                f"Lower nominal yields reduce the opportunity cost of holding gold, "
+                f"Lower nominal yields reduce the opportunity cost of holding {asset_key}, "
                 f"as the relative attractiveness of interest-bearing alternatives diminishes. "
                 f"This environment has historically tended to be supportive for precious metals."
             )
@@ -183,14 +181,14 @@ def get_clean_story(market_data: Dict) -> str:
     )
 
 
-def get_why_hard_or_easy(market_data: Dict) -> str:
+def get_why_hard_or_easy(market_data: Dict, asset_key: str = "gold") -> str:
     """Implication: Explain driver alignment or divergence."""
-    drivers = determine_drivers(market_data)
+    drivers = determine_drivers(market_data, asset_key)
     conflict = drivers["conflict"]
     conflict_note = drivers["conflict_note"]
     
-    gold = market_data.get("gold", {}).get("metrics", {})
-    gold_chg = gold.get("change_pct") or 0
+    asset = market_data.get(asset_key, {}).get("metrics", {})
+    asset_chg = asset.get("change_pct") or 0
     
     if conflict is True:
         return (
@@ -221,28 +219,30 @@ def get_why_hard_or_easy(market_data: Dict) -> str:
             )
 
 
-def get_chart_bullets(market_data: Dict) -> List[str]:
+def get_chart_bullets(market_data: Dict, asset_key: str = "gold") -> List[str]:
     """Reference each chart with structured observations."""
     bullets = []
     
-    gold = market_data.get("gold", {}).get("metrics", {})
+    asset = market_data.get(asset_key, {}).get("metrics", {})
     us10y = market_data.get("us10y", {}).get("metrics", {})
     dxy = market_data.get("dxy", {}).get("metrics", {})
     
-    gold_above_50 = gold.get("above_50")
-    if gold_above_50 is True:
+    asset_above_50 = asset.get("above_50")
+    label = asset_key.capitalize()
+    
+    if asset_above_50 is True:
         bullets.append(
-            "The price chart indicates gold is trading above its 50-day moving average, "
+            f"The price chart indicates {label} is trading above its 50-day moving average, "
             "which is often interpreted as a constructive near-term trend signal."
         )
-    elif gold_above_50 is False:
+    elif asset_above_50 is False:
         bullets.append(
-            "The price chart indicates gold is trading below its 50-day moving average, "
+            f"The price chart indicates {label} is trading below its 50-day moving average, "
             "which may suggest near-term technical weakness."
         )
     else:
         bullets.append(
-            "The price chart displays the recent trajectory of gold and silver prices, "
+            f"The price chart displays the recent trajectory of {label} prices, "
             "providing context for current levels relative to recent history."
         )
     
@@ -290,43 +290,44 @@ def get_chart_bullets(market_data: Dict) -> List[str]:
     return bullets
 
 
-def get_plain_takeaway(market_data: Dict) -> str:
+def get_plain_takeaway(market_data: Dict, asset_key: str = "gold") -> str:
     """Concise professional takeaway for non-specialist readers."""
-    drivers = determine_drivers(market_data)
-    gold = market_data.get("gold", {}).get("metrics", {})
-    gold_chg = gold.get("change_pct")
+    drivers = determine_drivers(market_data, asset_key)
+    asset = market_data.get(asset_key, {}).get("metrics", {})
+    asset_chg = asset.get("change_pct")
     
-    if gold_chg is None:
+    if asset_chg is None:
         return "Market data is currently loading."
     
     primary = drivers["primary"]
+    label = asset_key.capitalize()
     
-    if abs(gold_chg) < 0.15:
+    if abs(asset_chg) < 0.15:
         return (
-            "Gold and silver exhibited limited price movement during this session, "
+            f"{label} exhibited limited price movement during this session, "
             "with no dominant macro driver identified."
         )
     
     if primary == "Interest Rates":
-        if gold_chg > 0:
+        if asset_chg > 0:
             return (
-                "Gold advanced during this session, with price action appearing consistent with "
+                f"{label} advanced during this session, with price action appearing consistent with "
                 "declining Treasury yields, which reduce the opportunity cost of holding non-yielding assets."
             )
         else:
             return (
-                "Gold declined during this session, with price action appearing consistent with "
+                f"{label} declined during this session, with price action appearing consistent with "
                 "rising Treasury yields, which increase the relative attractiveness of interest-bearing instruments."
             )
     else:
-        if gold_chg > 0:
+        if asset_chg > 0:
             return (
-                "Gold advanced during this session, with price action appearing consistent with "
+                f"{label} advanced during this session, with price action appearing consistent with "
                 "U.S. dollar weakness, which historically tends to support dollar-denominated commodities."
             )
         else:
             return (
-                "Gold declined during this session, with price action appearing consistent with "
+                f"{label} declined during this session, with price action appearing consistent with "
                 "U.S. dollar strength, which historically tends to create headwinds for precious metals."
             )
 

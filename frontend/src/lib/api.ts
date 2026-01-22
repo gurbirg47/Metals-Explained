@@ -81,11 +81,11 @@ export async function getTimeseries(
     return res.json();
 }
 
-export async function getExplanation(window: string = '1D'): Promise<ExplainResponse> {
+export async function getExplanation(asset: string = 'gold', window: string = '1D'): Promise<ExplainResponse> {
     const res = await fetch(`${API_BASE}/market/explain`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ window }),
+        body: JSON.stringify({ selectedAsset: asset, window }),
         cache: 'no-store',
     });
     if (!res.ok) throw new Error('Failed to fetch explanation');

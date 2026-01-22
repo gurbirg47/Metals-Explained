@@ -170,20 +170,25 @@ export default function HomePage() {
       dataCache.silverVol = silverVol;
       dataCache.timestamp = Date.now();
 
-      // Fetch explanation in background
-      getExplanation('1D')
-        .then((explain) => {
-          setExplanation(explain);
-          dataCache.explanation = explain;
-        })
-        .catch(() => { });
-
     } catch (err) {
       console.error('Load error:', err);
       setError('Failed to load market data.');
       setIsLoading(false);
     }
   }, []);
+
+  // Fetch explanation when asset changes
+  useEffect(() => {
+    if (!snapshot) return;
+
+    setExplanation(null); // Clear old analysis
+    getExplanation(selectedAsset, '1D')
+      .then((explain) => {
+        setExplanation(explain);
+        dataCache.explanation = explain;
+      })
+      .catch(() => { });
+  }, [selectedAsset, snapshot]);
 
   useEffect(() => {
     loadData();
@@ -249,6 +254,16 @@ export default function HomePage() {
 
   return (
     <div>
+      {/* Dev-only Diagnostic Banner */}
+      {(process.env.NODE_ENV === 'development' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'))) && (
+        <div className="bg-[rgba(51,197,244,0.1)] border-b border-[rgba(51,197,244,0.2)] px-4 py-1 text-[10px] mono text-[var(--signal-accent)] flex justify-between items-center">
+          <span>[DIAGNOSTIC] API_BASE: {API_BASE}</span>
+          <span className={snapshot ? 'text-green-400' : 'text-red-400'}>
+            BACKEND: {snapshot ? 'CONNECTED' : 'DISCONNECTED'}
+          </span>
+        </div>
+      )}
+
       <DataBanner snapshot={snapshot} onRefresh={handleRefresh} isLoading={isLoading} />
 
       {/* Header */}

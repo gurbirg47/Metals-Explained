@@ -162,14 +162,15 @@ async def explain_market(request: ExplainRequest):
     """END-TO-END AUDITED: Returns contextual explanation without external calls."""
     try:
         data = await market_data.get_all_market_data()
-        drivers = analysis_engine.determine_drivers(data)
-        what_moved = analysis_engine.get_what_moved(data)
-        chart_bullets = analysis_engine.get_chart_bullets(data)
-        takeaway = analysis_engine.get_plain_takeaway(data)
+        asset = request.selectedAsset
+        drivers = analysis_engine.determine_drivers(data, asset)
+        what_moved = analysis_engine.get_what_moved(data, asset)
+        chart_bullets = analysis_engine.get_chart_bullets(data, asset)
+        takeaway = analysis_engine.get_plain_takeaway(data, asset)
         
         return {
             "asOf": datetime.now().isoformat(),
-            "selectedAsset": request.selectedAsset,
+            "selectedAsset": asset,
             "sections": {
                 "whatMoved": what_moved,
                 "mostLikelyDriver": drivers["primary"],
