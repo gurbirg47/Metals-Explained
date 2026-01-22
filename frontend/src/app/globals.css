@@ -1,0 +1,321 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Bitter:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+
+:root {
+  /* Backgrounds */
+  --bg-void: #05070A;
+  --bg-surface: #0F1216;
+  --bg-depth: #1A232E;
+
+  /* Text */
+  --text-primary: #E8ECEF;
+  --text-muted: #A8B0B8;
+
+  /* Signals */
+  --signal-accent: #33C5F4;
+  --signal-up: #00E676;
+  --signal-down: #FF453A;
+  --signal-volatility: #FFD700;
+  --signal-macro: #FF6B00;
+}
+
+body {
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+  font-family: 'Bitter', serif;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 0.8s linear infinite;
+}
+
+.border-2 {
+  border-width: 2px;
+}
+
+.border-3 {
+  border-width: 3px;
+}
+
+/* Typography - Refined sizes */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Barlow Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.6rem;
+}
+
+h3 {
+  font-size: 1.3rem;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Metric Cards - Compact */
+.metric-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.875rem;
+}
+
+.metric-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.125rem;
+}
+
+.metric-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.metric-delta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  margin-top: 0.125rem;
+}
+
+.metric-delta.up {
+  color: var(--signal-up);
+}
+
+.metric-delta.down {
+  color: var(--signal-down);
+}
+
+.metric-delta.neutral {
+  color: var(--text-muted);
+}
+
+/* Data Banner - Compact */
+.data-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 1rem;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.data-banner.live {
+  background: rgba(0, 230, 118, 0.1);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+  color: var(--signal-up);
+}
+
+.data-banner.demo {
+  background: rgba(51, 197, 244, 0.1);
+  border: 1px solid rgba(51, 197, 244, 0.3);
+  color: var(--signal-accent);
+}
+
+.data-banner.partial {
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  color: var(--signal-volatility);
+}
+
+/* Navigation - Readable */
+.nav-tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--bg-surface);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 2px solid var(--bg-depth);
+  overflow-x: auto;
+}
+
+.nav-tab {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.5rem 0.875rem;
+  border-radius: 4px;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.nav-tab:hover {
+  color: var(--text-primary);
+  background: rgba(51, 197, 244, 0.08);
+}
+
+.nav-tab.active {
+  color: #FFFFFF;
+  background: rgba(51, 197, 244, 0.15);
+  border-bottom: 2px solid var(--signal-accent);
+  font-weight: 600;
+}
+
+/* Buttons - Compact */
+.btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.4rem 0.875rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--signal-accent);
+  color: var(--bg-void);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #5dd5ff;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+  border-color: var(--signal-accent);
+  color: var(--signal-accent);
+}
+
+.btn-secondary.active {
+  background: rgba(51, 197, 244, 0.12);
+  border-color: var(--signal-accent);
+  color: var(--signal-accent);
+}
+
+/* Chart container */
+.chart-container {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.chart-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.chart-caption {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.375rem;
+  line-height: 1.4;
+}
+
+/* Section cards - Compact */
+.section-card {
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid var(--signal-accent);
+  padding: 0.75rem 1rem;
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  color: var(--signal-accent);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.03em;
+}
+
+/* Driver ranking - Compact */
+.driver-ranking {
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid var(--signal-accent);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0 4px 4px 0;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  margin: 1rem 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-depth);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Select dropdown */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A8B0B8' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 1.5rem;
+}
+
+select option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
