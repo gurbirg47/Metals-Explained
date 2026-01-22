@@ -45,7 +45,6 @@ export default function PriceChart({
                 vertLines: { color: 'rgba(160, 168, 176, 0.1)' },
                 horzLines: { color: 'rgba(160, 168, 176, 0.15)' },
             },
-            维持Width: true,
             width: chartContainerRef.current.clientWidth,
             height: 280,
             timeScale: {

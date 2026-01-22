@@ -76,7 +76,7 @@ class TimeseriesResponse(BaseModel):
     asOf: str
     asset: str
     window: str
-    supportsCandles: bool = False
+    hasOHLC: bool = False
     series: List[Dict[str, Any]]
 
 class ExplainRequest(BaseModel):

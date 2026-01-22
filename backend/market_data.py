@@ -165,13 +165,14 @@ def get_timeseries_data(asset_key: str, window: str, market_data: Dict) -> Dict:
                 "asOf": datetime.now().isoformat(),
                 "asset": asset_key,
                 "window": window,
+                "hasOHLC": False,
                 "series": market_data[base]["vol"]["series"]
             }
     
     if asset_key not in market_data:
         mock_df = generate_mock_history(asset_key if asset_key in ASSETS else "gold")
         series = [{"t": r['Date'].isoformat(), "close": float(r['Close'])} for _, r in mock_df.iterrows()]
-        return {"asOf": datetime.now().isoformat(), "asset": asset_key, "window": window, "series": series}
+        return {"asOf": datetime.now().isoformat(), "asset": asset_key, "window": window, "hasOHLC": False, "series": series}
 
     df = market_data[asset_key]["df"]
     asset_type = ASSETS.get(asset_key, {}).get("type", "price")
@@ -200,7 +201,7 @@ def get_timeseries_data(asset_key: str, window: str, market_data: Dict) -> Dict:
         "asOf": datetime.now().isoformat(),
         "asset": asset_key,
         "window": window,
-        "supportsCandles": has_ohlc and asset_type == "price",
+        "hasOHLC": has_ohlc and asset_type == "price",
         "series": series
     }
 

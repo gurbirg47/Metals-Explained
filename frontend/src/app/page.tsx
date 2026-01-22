@@ -76,7 +76,7 @@ const MemoizedChart = memo(function MemoizedChart({
     <PriceChart
       title={title}
       series={series.series}
-      hasOHLC={series.supportsCandles}
+      hasOHLC={series.hasOHLC}
       chartType={chartType}
       color={color}
     />

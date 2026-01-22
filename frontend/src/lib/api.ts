@@ -40,7 +40,7 @@ export interface TimeseriesResponse {
     asOf: string;
     asset: string;
     window: string;
-    supportsCandles: boolean;
+    hasOHLC: boolean;
     series: TimeseriesPoint[];
 }
 
