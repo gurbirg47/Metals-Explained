@@ -319,3 +319,297 @@ select option {
   background: var(--bg-surface);
   color: var(--text-primary);
 }
+
+/* ============================================
+   MOBILE NAVIGATION
+   ============================================ */
+
+/* Mobile Header Bar */
+.mobile-nav-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  background: var(--bg-surface);
+  border-bottom: 2px solid var(--bg-depth);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.mobile-nav-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-primary);
+}
+
+/* Hamburger Button */
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hamburger-line {
+  width: 24px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.hamburger-line.open:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger-line.open:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-line.open:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Overlay */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide-in Drawer */
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 85%;
+  max-width: 320px;
+  height: 100vh;
+  background: var(--bg-surface);
+  z-index: 300;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--bg-depth);
+}
+
+.drawer-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.close-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.close-btn:hover,
+.close-btn:active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.15s ease;
+  min-height: 56px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.drawer-link:hover,
+.drawer-link:active {
+  background: rgba(51, 197, 244, 0.08);
+  color: var(--text-primary);
+}
+
+.drawer-link.active {
+  background: rgba(51, 197, 244, 0.12);
+  color: var(--signal-accent);
+  border-left: 3px solid var(--signal-accent);
+}
+
+.drawer-icon {
+  font-size: 1.25rem;
+  width: 28px;
+  text-align: center;
+}
+
+.drawer-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  flex: 1;
+}
+
+.drawer-active-indicator {
+  color: var(--signal-accent);
+  font-size: 0.5rem;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 767px) {
+
+  /* Typography adjustments */
+  body {
+    font-size: 0.9rem;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.35rem;
+  }
+
+  h3 {
+    font-size: 1.15rem;
+  }
+
+  /* Hide desktop nav on mobile */
+  .nav-tabs {
+    display: none;
+  }
+
+  /* Main content padding */
+  main {
+    padding: 0.75rem !important;
+  }
+
+  /* Metric cards - stack and touch-friendly */
+  .metric-card {
+    padding: 1rem;
+  }
+
+  .metric-value {
+    font-size: 1.65rem;
+  }
+
+  /* Charts - full width */
+  .chart-container {
+    padding: 0.5rem;
+    margin: 0 -0.75rem;
+    border-radius: 0;
+  }
+
+  .chart-title {
+    font-size: 1rem;
+    padding: 0 0.25rem;
+  }
+
+  /* Buttons - larger touch targets */
+  .btn {
+    padding: 0.625rem 1rem;
+    font-size: 1rem;
+    min-height: 44px;
+  }
+
+  /* Select dropdowns - touch-friendly */
+  select {
+    padding: 0.625rem 2rem 0.625rem 0.75rem;
+    font-size: 1rem;
+    min-height: 44px;
+  }
+
+  /* Data banner - wrap on mobile */
+  .data-banner {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Section cards */
+  .section-card {
+    padding: 0.875rem 1rem;
+  }
+
+  /* Footer adjustments */
+  footer {
+    padding: 1.5rem 1rem !important;
+    text-align: center;
+  }
+}
+
+/* Small phones */
+@media (max-width: 374px) {
+  .mobile-nav-title {
+    font-size: 1.1rem;
+  }
+
+  .drawer-label {
+    font-size: 1rem;
+  }
+
+  .metric-value {
+    font-size: 1.5rem;
+  }
+}
