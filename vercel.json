@@ -6,18 +6,21 @@
             "use": "@vercel/next"
         },
         {
-            "src": "backend/main.py",
-            "use": "@vercel/python"
+            "src": "api/index.py",
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "50mb"
+            }
         }
     ],
-    "rewrites": [
+    "routes": [
         {
-            "source": "/api/(.*)",
-            "destination": "backend/main.py"
+            "src": "/api/(.*)",
+            "dest": "/api/index.py"
         },
         {
-            "source": "/(.*)",
-            "destination": "frontend/$1"
+            "src": "/(.*)",
+            "dest": "/frontend/$1"
         }
     ]
 }
