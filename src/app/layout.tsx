@@ -23,7 +23,7 @@ export default function RootLayout({
           <p className="mb-2">DATA: YAHOO FINANCE | MANUAL REFRESH | FOR LEARNING ONLY | NOT INVESTMENT ADVICE</p>
           <p className="font-['Bitter']">
             Created by Gurbir Gill<br />
-            <span className="text-xs">Accounting & Finance student with an interest in Sales & Trading and market structure.</span>
+            <span className="text-xs">Accounting & Finance student with an interest in financial markets.</span>
           </p>
         </footer>
       </body>
