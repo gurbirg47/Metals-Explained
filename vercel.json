@@ -2,24 +2,25 @@
     "version": 2,
     "builds": [
         {
-            "src": "frontend/package.json",
-            "use": "@vercel/next"
+            "src": "api/index.py",
+            "use": "@vercel/python"
         },
         {
-            "src": "api/index.py",
-            "use": "@vercel/python",
-            "config": {
-                "maxLambdaSize": "50mb"
-            }
+            "src": "frontend/package.json",
+            "use": "@vercel/next"
         }
     ],
     "routes": [
         {
-            "src": "/api/(.*)",
+            "src": "/api/health",
             "dest": "/api/index.py"
         },
         {
-            "src": "/(.*)",
+            "src": "/api/market/(.*)",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/((?!api).*)",
             "dest": "/frontend/$1"
         }
     ]
